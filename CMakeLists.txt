@@ -21,6 +21,10 @@ set(CORE_SOURCES
     # download
     src/core/download/VersionManifest.cpp
     src/core/download/Headers/VersionManifest.h
+    src/core/download/Headers/VersionManifest.h
+    src/core/download/Headers/VersionJsonParser.h
+    src/core/download/Headers/VersionDetails.h
+    src/core/download/VersionJsonParser.cpp
     # src/core/download/DownloadManager.cpp
     # src/core/download/AssetManager.cpp
 

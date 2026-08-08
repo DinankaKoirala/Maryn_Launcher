@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "VersionManifest.h"
 #include "VersionJsonParser.h"
+#include "DownloadManager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,5 +24,6 @@ private:
     Ui::MainWindow *ui;
     VersionManifest *m_versionManifest;
     VersionJsonParser *m_versionParser;
+    DownloadManager *m_downloadManager;
 };
 #endif // MAINWINDOW_H

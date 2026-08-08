@@ -25,7 +25,8 @@ set(CORE_SOURCES
     src/core/download/Headers/VersionJsonParser.h
     src/core/download/Headers/VersionDetails.h
     src/core/download/VersionJsonParser.cpp
-    # src/core/download/DownloadManager.cpp
+    src/core/download/DownloadManager.cpp
+    src/core/download/Headers/DownloadManager.h
     # src/core/download/AssetManager.cpp
 
     # launch

@@ -8,7 +8,8 @@ DownloadManager::DownloadManager(QObject *parent):QObject(parent){
     m_completedCount = 0;
     
     QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    m_baseDir = appData + "/.MarynLauncher";
+    m_baseDir = appData;
+    qDebug() << "AppData path:" << appData;
 
     QDir dir;
     dir.mkpath(m_baseDir + "/cache/libraries");
@@ -22,10 +23,10 @@ void DownloadManager::download(const VersionDetails &details, const QString &ins
     QDir dir;
     dir.mkpath(instanceDir);
 
-    QString clientPath = instanceDir + "/cilent.jar";
+    QString clientPath = instanceDir + "/client.jar";
     downloadFile(details.clientUrl, clientPath);
     for(const LibraryInfo &lib : details.libraries){
-        QString libPath = m_baseDir + "/cache/libararies" + lib.path;
+        QString libPath = m_baseDir + "/cache/libraries/" + lib.path;
         QFileInfo fileInfo(libPath);
         dir.mkpath(fileInfo.absolutePath());
 

@@ -5,7 +5,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-VersionJsonParser::VersionJsonParser(QObject *parent):QObject(parent){
+VersionJsonParser::VersionJsonParser(const QString &cacheDir, QObject *parent)
+: QObject(parent), m_cacheDir(cacheDir){
     m_manager = new QNetworkAccessManager(this);
 }
 
@@ -38,6 +39,7 @@ void VersionJsonParser::onReplyFinished(QNetworkReply *reply){
     VersionDetails details;
     details.mainClass = root["mainClass"].toString();
     details.javaVersion = root["javaVersion"].toObject()["majorVersion"].toInt();
+    details.javaRuntimeName = root["javaVersion"].toObject()["component"].toString();
 
     QJsonObject clientDownload = root["downloads"].toObject()["client"].toObject();
     details.clientUrl  = clientDownload["url"].toString();
@@ -46,6 +48,7 @@ void VersionJsonParser::onReplyFinished(QNetworkReply *reply){
     QJsonObject assetIndex = root["assetIndex"].toObject();
     details.assetIndexUrl = assetIndex["url"].toString();
     details.assetIndexId  = assetIndex["id"].toString();
+    details.versionId = root["id"].toString();
 
     QJsonArray librariesArray = root["libraries"].toArray();
     for(const QJsonValue &value : librariesArray){
@@ -61,6 +64,7 @@ void VersionJsonParser::onReplyFinished(QNetworkReply *reply){
         lib.sha1 = artifact["sha1"].toString();
         lib.path = artifact["path"].toString();
 
+        details.libraryPaths << m_cacheDir + "/libraries/" + lib.path;
         details.libraries.append(lib);
     }
     QJsonArray gameArgs = root["arguments"].toObject()["game"].toArray();

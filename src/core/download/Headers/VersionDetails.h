@@ -19,4 +19,7 @@ struct VersionDetails{
     QList<LibraryInfo> libraries;
     QList<QString> gameArgs;
     QList<QString> jvmArgs;
+    QString versionId;
+    QStringList libraryPaths;
+    QString javaRuntimeName;
 };

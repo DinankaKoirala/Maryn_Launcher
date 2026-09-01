@@ -10,7 +10,7 @@ class VersionJsonParser : public QObject{
     Q_OBJECT
 
     public: 
-    explicit VersionJsonParser(QObject *parent = nullptr);
+    explicit VersionJsonParser(const QString &cacheDir, QObject *parent = nullptr);
     void fetch(const QString &url);
 
     signals:
@@ -22,4 +22,5 @@ class VersionJsonParser : public QObject{
 
     private:
         QNetworkAccessManager *m_manager;
+        QString m_cacheDir;
 };

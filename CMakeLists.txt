@@ -27,10 +27,13 @@ set(CORE_SOURCES
     src/core/download/VersionJsonParser.cpp
     src/core/download/DownloadManager.cpp
     src/core/download/Headers/DownloadManager.h
+    src/core/download/Headers/JavaManager.h
+    src/core/download/JavaManager.cpp
     # src/core/download/AssetManager.cpp
 
     # launch
-    # src/core/launch/LaunchEngine.cpp
+    src/core/launch/LaunchEngine.cpp
+    src/core/launch/Headers/LaunchEngine.h
 
     # java
     # src/core/java/JavaManager.cpp
@@ -66,6 +69,7 @@ target_include_directories(Maryn_Launcher PRIVATE
     src/core
     src/core/download/Headers
     src/ui
+    src/core/launch/Headers
 )
 
 # ─── Link Libraries ───────────────────────────────────────────────────────────

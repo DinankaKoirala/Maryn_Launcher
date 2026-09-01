@@ -29,7 +29,8 @@ set(CORE_SOURCES
     src/core/download/Headers/DownloadManager.h
     src/core/download/Headers/JavaManager.h
     src/core/download/JavaManager.cpp
-    # src/core/download/AssetManager.cpp
+    src/core/download/AssetManager.cpp
+    src/core/download/Headers/AssetManager.h
 
     # launch
     src/core/launch/LaunchEngine.cpp

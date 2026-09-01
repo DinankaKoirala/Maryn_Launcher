@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QDir>
 #include <QProcess>
+#include "VersionDetails.h"
 
 class VersionJsonParser;
 
@@ -28,7 +29,7 @@ private:
     static QString javaExecutableName();
     static QString classPathSeparator();
     QString buildClassPath(const QStringList &libraryPath , const QString &clientJarPath) const;
-    QString ressolvePlaceholders(const QString &args , const QMAP<QString, QString> &vars) const;
-    QString ressolveArgumentList(const QStringList &args , const QMAP<QString, QString> &vars) const;
+    QString ressolvePlaceholders(const QString &args , const QMap<QString, QString> &vars) const;
+    QStringList resolveArgumentList(const QStringList &args , const QMap<QString, QString> &vars) const;
     QStringList platformExtraJvmFlags() const;
 };

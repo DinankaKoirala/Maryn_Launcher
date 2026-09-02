@@ -25,5 +25,6 @@ private:
     VersionManifest *m_versionManifest;
     VersionJsonParser *m_versionParser;
     DownloadManager *m_downloadManager;
+    QString m_cacheDir;
 };
 #endif // MAINWINDOW_H

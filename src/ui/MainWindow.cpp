@@ -1,11 +1,13 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include <QDebug>
+#include <QDir>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    m_cacheDir = QDir::homePath() + "/.local/share/MarynLauncher";
     ui->setupUi(this);
 
     m_versionManifest = new VersionManifest(this);
@@ -14,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
             this, [this](QList<VersionInfo> versions) {
                 qDebug() << "Got" << versions.size() << "versions";
 
-                m_versionParser = new VersionJsonParser(this);
+                m_versionParser = new VersionJsonParser(m_cacheDir, this);
 
                 connect(m_versionParser, &VersionJsonParser::finished,
                         this, [this](VersionDetails details) {

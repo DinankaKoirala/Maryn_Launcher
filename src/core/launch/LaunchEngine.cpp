@@ -24,15 +24,15 @@ QString LaunchEngine::classPathSeparator(){
 }
 
 QString LaunchEngine::buildClassPath(const QStringList &libraryPath , const QString &clientJarPath) const{
-    QStringList allPaths = libraryPaths;
-    allPaths << ClientJarPath;
+    QStringList allPaths = libraryPath;
+    allPaths << clientJarPath;
 
     return allPaths.join(classPathSeparator());
 }
 
- QString LaunchEngine::ressolvePlaceholders(const QString &args , const QMAP<QString, QString> &vars) const{
-    QString result = arg;
-    for (auto it = vars.constBegin() ; it != vars.consEnd() ;  ++it){
+ QString LaunchEngine::resolvePlaceholders(const QString &args , const QMap<QString, QString> &vars) const{
+    QString result = args;
+    for (auto it = vars.constBegin() ; it != vars.constEnd() ;  ++it){
         QString placeholder = QStringLiteral("${") + it.key() + QStringLiteral("}");
         result.replace(placeholder, it.value());
     }
@@ -41,11 +41,11 @@ QString LaunchEngine::buildClassPath(const QStringList &libraryPath , const QStr
 }
 
 
-QString LaunchEngine::ressolveArgumentList(const QStringList &args , const QMAP<QString, QString> &vars) const{
-    QString resolved;
+QStringList LaunchEngine::resolveArgumentList(const QStringList &args , const QMap<QString, QString> &vars) const{
+    QStringList resolved;
 
-    for (const QString &arg : arg){
-        resolved<<resolvedPlaceholders(arg,vars)
+    for (const QString &arg : args){
+        resolved<<resolvePlaceholders(arg,vars);
     }
     return resolved;
 }
@@ -62,7 +62,7 @@ QStringList LaunchEngine::platformExtraJvmFlags() const {
 
 void LaunchEngine::launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &gameDir){
 
-    QString javaPath = QDir::cleanPath(gameDir + "/cache/runtime/" + details.javaVersion + "/bin/" + javaExecutableName());
+    QString javaPath = QDir::cleanPath(gameDir + "/cache/runtime/" + QString::number(details.javaVersion) + "/bin/" + javaExecutableName());
     qDebug() << "[LaunchEngine] Java:"<<javaPath;
 
     QString clientJarPath = QDir::cleanPath(gameDir + "/instances/" + instanceName + "/client.jar");
@@ -84,10 +84,10 @@ void LaunchEngine::launch(const VersionDetails &details, const QString &instance
     vars["launcher_name"] = "MarynLauncher";
     vars["launcher_version"] = "0.1.0";
 
-    QStringList jvmArgs = ressolveArgumentList(details.jvmArguments, vars);
+    QStringList jvmArgs = resolveArgumentList(details.jvmArgs, vars);
     jvmArgs << platformExtraJvmFlags();
 
-    QStringList gameArgs = ressolveArgumentList(details.gameArguments, vars);
+    QStringList gameArgs = resolveArgumentList(details.gameArgs, vars);
 
     QStringList fullArgs;
     fullArgs << jvmArgs;

@@ -1,30 +1,53 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
+#pragma once
 #include <QMainWindow>
-#include "VersionManifest.h"
-#include "VersionJsonParser.h"
-#include "DownloadManager.h"
+#include <QNetworkAccessManager>
+#include <QLabel>
+#include <QTextEdit>
+#include <QPushButton>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QStandardPaths>
+#include "../core/download/Headers/VersionManifest.h"
+#include "../core/download/Headers/VersionJsonParser.h"
+#include "../core/download/Headers/AssetManager.h"
+#include "../core/download/Headers/JavaManager.h"
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
+class VersionManifest;
+class DownloadManager;
+class LaunchEngine;
+class VersionJsonParser;
+class JavaManager;
+class AssetManager;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    void onDownloadClicked();
+    void onLaunchClicked();
+    void onManifestFetched(QList<VersionInfo> versions);
+    void onVersionJsonParsed(VersionDetails details);
 
 private:
-    Ui::MainWindow *ui;
+    QString cacheDir;
     VersionManifest *m_versionManifest;
-    VersionJsonParser *m_versionParser;
     DownloadManager *m_downloadManager;
-    QString m_cacheDir;
+    LaunchEngine *m_launchEngine;
+    VersionJsonParser *m_versionJsonParser;
+    AssetManager *m_assetManager;
+    JavaManager *m_javaManager;
+    QList<VersionInfo> m_versions;
+    QLabel *m_statusLabel;
+    QTextEdit *m_logArea;
+    QPushButton *m_download;
+    QPushButton *m_launch;
+    QComboBox *m_versionSelection;
+    QNetworkAccessManager *m_networkManager;
+    QCheckBox *m_snapshotToggle;
+
+    void populateVersionList();
 };
-#endif // MAINWINDOW_H

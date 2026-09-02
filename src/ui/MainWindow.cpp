@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
  connect(m_download, &QPushButton::clicked, this, &MainWindow::onDownloadClicked);
  connect(m_launch, &QPushButton::clicked, this, &MainWindow::onLaunchClicked);
 
- cacheDir = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first() + "/cache/versions";
+ cacheDir = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first();
 
 
 m_versionManifest = new VersionManifest(this);

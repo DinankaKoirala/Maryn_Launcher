@@ -39,7 +39,7 @@ void AssetManager::download(const QString &assetIndexUrl){
         QString twoChars = hash.left(2);
 
         QString url = "https://resources.download.minecraft.net/" + twoChars + "/" + hash;
-        QString savePath = QDir::cleanPath(m_cacheDir + "/assets/objects" + twoChars + "/" + hash);
+        QString savePath = QDir::cleanPath(m_cacheDir + "/assets/objects/" + twoChars + "/" + hash);
 
         downloadFile(url, savePath);
     }

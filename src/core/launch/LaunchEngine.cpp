@@ -60,13 +60,12 @@ QStringList LaunchEngine::platformExtraJvmFlags() const {
 }
 
 
-void LaunchEngine::launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &gameDir){
+void LaunchEngine::launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &baseDir){
 
-    QString baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QString javaPath = QDir::cleanPath(baseDir + "/runtime/" + details.javaRuntimeName + "/bin/" + javaExecutableName());
     qDebug() << "[LaunchEngine] Java:"<<javaPath;
 
-    QString clientJarPath = QDir::cleanPath(gameDir + "/client.jar");
+    QString clientJarPath = QDir::cleanPath(baseDir + "/instances/" + instanceName + "/client.jar");
 
     QString classPath = buildClassPath(details.libraryPaths , clientJarPath);
 
@@ -78,8 +77,8 @@ void LaunchEngine::launch(const VersionDetails &details, const QString &instance
     vars["user_type"] = "mojang";
     vars["version_name"] = details.versionId;
     vars["version_type"] = "release";
-    vars["game_directory"]    = QDir::toNativeSeparators(gameDir + "/instances/" + instanceName);
-    vars["assets_root"]       = QDir::toNativeSeparators(gameDir + "/cache/assets");
+    vars["game_directory"]    = QDir::toNativeSeparators(baseDir + "/instances/" + instanceName);
+    vars["assets_root"]       = QDir::toNativeSeparators(baseDir + "/assets");
     vars["assets_index_name"] = details.assetIndexId;
     vars["classpath"] = classPath;
     vars["launcher_name"] = "MarynLauncher";

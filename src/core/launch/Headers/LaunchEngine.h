@@ -16,7 +16,7 @@ class LaunchEngine : public QObject{
 
 public:
     explicit LaunchEngine(QObject *parent = nullptr);
-    void launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &gameDir);
+    void launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &baseDir);
 
 signals:
     void gameStarted();

@@ -87,7 +87,7 @@ void MainWindow::onDownloadClicked(){
 }
 
 void MainWindow::onLaunchClicked(){
-    QString gameDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/instances/testMinecraft";
+    QString baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     m_logArea->append(">Launching...");
     statusBar()->showMessage("launching");
     QString username = m_nameInput->text();
@@ -116,7 +116,7 @@ void MainWindow::onLaunchClicked(){
         m_logArea->append(line);
     });
 
-    m_launchEngine->launch(m_versionDetails, "testMinecraft", username, offlineUuid(username), "0", gameDir);
+    m_launchEngine->launch(m_versionDetails, "testMinecraft", username, offlineUuid(username), "0", baseDir);
 }
 
 void MainWindow::onManifestFetched(QList<VersionInfo> versions)
@@ -162,7 +162,7 @@ void MainWindow::onVersionJsonParsed(VersionDetails details){
             });
             m_javaManager->download(details.javaRuntimeName);
         });
-        m_assetManager->download(details.assetIndexUrl);
+        m_assetManager->download(details.assetIndexUrl, details.assetIndexId);
     });
 
     m_downloadManager->download(details, "testMinecraft");

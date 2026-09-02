@@ -18,7 +18,7 @@ signals:
 
 private:
     void fetchManifest(const QString &manifestUrl, const QString &runtimeName);
-    void downloadFile(const QString &url, const QString &savePath);
+    void downloadFile(const QString &url, const QString &savePath, bool isExecutable);
     void checkIfDone();
 
     static QString platformKey();

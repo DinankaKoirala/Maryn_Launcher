@@ -62,7 +62,6 @@ void JavaManager::download(const QString &runtimeName)
         fetchManifest(manifestUrl, runtimeName);
     });
 }
-
 void JavaManager::fetchManifest(const QString &manifestUrl, const QString &runtimeName)
 {
     QNetworkReply *reply = m_manager->get(QNetworkRequest(QUrl(manifestUrl)));
@@ -78,7 +77,6 @@ void JavaManager::fetchManifest(const QString &manifestUrl, const QString &runti
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         QJsonObject files = doc.object()["files"].toObject();
 
-        // Count only downloadable files first
         m_totalCount = 0;
         m_completedCount = 0;
 
@@ -94,12 +92,11 @@ void JavaManager::fetchManifest(const QString &manifestUrl, const QString &runti
             return;
         }
 
-        // Now kick off every download
         for (auto it = files.constBegin(); it != files.constEnd(); ++it) {
             QJsonObject fileObj = it.value().toObject();
 
             if (fileObj["type"].toString() != "file") {
-                continue;  // skip directories
+                continue;
             }
 
             QString relativePath = it.key();
@@ -112,17 +109,18 @@ void JavaManager::fetchManifest(const QString &manifestUrl, const QString &runti
             .toObject()["url"]
             .toString();
 
-            downloadFile(url, savePath);
+            bool isExecutable = fileObj["executable"].toBool();
+
+            downloadFile(url, savePath, isExecutable);
         }
     });
 }
 
-
-void JavaManager::downloadFile(const QString &url, const QString &savePath)
+void JavaManager::downloadFile(const QString &url, const QString &savePath, bool isExecutable)
 {
     QNetworkReply *reply = m_manager->get(QNetworkRequest(QUrl(url)));
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, savePath]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, savePath, isExecutable]() {
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
@@ -130,7 +128,6 @@ void JavaManager::downloadFile(const QString &url, const QString &savePath)
             return;
         }
 
-        // Make sure the directory exists before writing
         QFileInfo fileInfo(savePath);
         QDir().mkpath(fileInfo.absolutePath());
 
@@ -138,13 +135,14 @@ void JavaManager::downloadFile(const QString &url, const QString &savePath)
         if (file.open(QIODevice::WriteOnly)) {
             file.write(reply->readAll());
             file.close();
-            if(savePath.contains("/bin/")) {
+
+            if (isExecutable || savePath.contains("/bin/")) {
                 file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
                 QFileDevice::ReadGroup | QFileDevice::ExeGroup |
                 QFileDevice::ReadOther | QFileDevice::ExeOther);
             }
         }
-         else {
+        else {
             emit errorOccurred("Could not write file: " + savePath);
         }
 

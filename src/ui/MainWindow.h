@@ -43,6 +43,7 @@ private:
     QList<VersionInfo> m_versions;
     QLabel *m_statusLabel;
     QTextEdit *m_logArea;
+    QTextEdit *m_offlineName;
     QPushButton *m_download;
     QPushButton *m_launch;
     QComboBox *m_versionSelection;

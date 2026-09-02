@@ -33,6 +33,9 @@ MainWindow::MainWindow(QWidget *parent)
  buttonLayout->addWidget(m_launch);
  mainLayout->addLayout(buttonLayout);
 
+ m_offlineName = new QTextEdit(this);
+ m_offlineName->setPlaceholderText("Enter your name");
+  mainLayout->addWidget(m_offlineName);
  m_logArea = new QTextEdit(this);
  m_logArea->setReadOnly(true);
  mainLayout->addWidget(m_logArea);

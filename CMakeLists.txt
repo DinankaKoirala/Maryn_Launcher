@@ -111,11 +111,12 @@ elseif(APPLE)
         HINTS "${Qt6_DIR}/../../../bin"
     )
     if(MACDEPLOYQT_EXECUTABLE)
-        add_custom_command(TARGET Maryn_Launcher POST_BUILD
-            COMMAND "${MACDEPLOYQT_EXECUTABLE}"
-                    "$<TARGET_BUNDLE_DIR:Maryn_Launcher>"
-                    -verbose=0
-            COMMENT "Running macdeployqt..."
-        )
+    add_custom_command(TARGET Maryn_Launcher POST_BUILD
+        COMMAND "${MACDEPLOYQT_EXECUTABLE}"
+                "$<TARGET_BUNDLE_DIR:Maryn_Launcher>"
+                -verbose=0
+        COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:Maryn_Launcher>"
+        COMMENT "Running macdeployqt and re-signing..."
+    )
     endif()
 endif()

@@ -12,7 +12,7 @@ DownloadManager::DownloadManager(QObject *parent):QObject(parent){
     qDebug() << "AppData path:" << appData;
 
     QDir dir;
-    dir.mkpath(m_baseDir + "/cache/libraries");
+    dir.mkpath(m_baseDir + "/libraries");
 }
 
 void DownloadManager::download(const VersionDetails &details, const QString &instanceName){
@@ -26,7 +26,7 @@ void DownloadManager::download(const VersionDetails &details, const QString &ins
     QString clientPath = instanceDir + "/client.jar";
     downloadFile(details.clientUrl, clientPath);
     for(const LibraryInfo &lib : details.libraries){
-        QString libPath = m_baseDir + "/cache/libraries/" + lib.path;
+        QString libPath = m_baseDir + "/libraries/" + lib.path;
         QFileInfo fileInfo(libPath);
         dir.mkpath(fileInfo.absolutePath());
 

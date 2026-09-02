@@ -62,10 +62,11 @@ QStringList LaunchEngine::platformExtraJvmFlags() const {
 
 void LaunchEngine::launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &gameDir){
 
-    QString javaPath = QDir::cleanPath(gameDir + "/cache/runtime/" + QString::number(details.javaVersion) + "/bin/" + javaExecutableName());
+    QString baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString javaPath = QDir::cleanPath(baseDir + "/runtime/" + details.javaRuntimeName + "/bin/" + javaExecutableName());
     qDebug() << "[LaunchEngine] Java:"<<javaPath;
 
-    QString clientJarPath = QDir::cleanPath(gameDir + "/instances/" + instanceName + "/client.jar");
+    QString clientJarPath = QDir::cleanPath(gameDir + "/client.jar");
 
     QString classPath = buildClassPath(details.libraryPaths , clientJarPath);
 

@@ -138,7 +138,13 @@ void JavaManager::downloadFile(const QString &url, const QString &savePath)
         if (file.open(QIODevice::WriteOnly)) {
             file.write(reply->readAll());
             file.close();
-        } else {
+            if(savePath.contains("/bin/")) {
+                file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                QFileDevice::ReadGroup | QFileDevice::ExeGroup |
+                QFileDevice::ReadOther | QFileDevice::ExeOther);
+            }
+        }
+         else {
             emit errorOccurred("Could not write file: " + savePath);
         }
 

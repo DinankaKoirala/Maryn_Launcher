@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QProcess>
 #include "VersionDetails.h"
+#include <QStandardPaths>
 
 class VersionJsonParser;
 

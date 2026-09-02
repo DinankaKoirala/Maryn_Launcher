@@ -33,9 +33,10 @@ MainWindow::MainWindow(QWidget *parent)
  buttonLayout->addWidget(m_launch);
  mainLayout->addLayout(buttonLayout);
 
- m_offlineName = new QTextEdit(this);
- m_offlineName->setPlaceholderText("Enter your name");
-  mainLayout->addWidget(m_offlineName);
+ m_nameInput = new QLineEdit(this);
+ m_nameInput->setPlaceholderText("Enter your name");
+ m_nameInput->setMaxLength(16);
+ mainLayout->addWidget(m_nameInput);
  m_logArea = new QTextEdit(this);
  m_logArea->setReadOnly(true);
  mainLayout->addWidget(m_logArea);
@@ -86,8 +87,36 @@ void MainWindow::onDownloadClicked(){
 }
 
 void MainWindow::onLaunchClicked(){
+    QString gameDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/instances/testMinecraft";
     m_logArea->append(">Launching...");
     statusBar()->showMessage("launching");
+    QString username = m_nameInput->text();
+    if(m_nameInput->text().trimmed().isEmpty()){
+        m_logArea->append("> Error: please enter a username.");
+        return;
+    }
+
+    m_launchEngine = new LaunchEngine(this);
+    connect(m_launchEngine, &LaunchEngine::gameStarted, this, [this]() {
+        m_logArea->append("> Game is running.");
+        statusBar()->showMessage("Game Running");
+    });
+
+    connect(m_launchEngine, &LaunchEngine::gameFinished, this, [this](int exitCode) {
+        m_logArea->append("> Game exited with code: " + QString::number(exitCode));
+        statusBar()->showMessage("idle");
+    });
+
+    connect(m_launchEngine, &LaunchEngine::launchError, this, [this](const QString &message) {
+        m_logArea->append("> Launch error: " + message);
+        statusBar()->showMessage("error");
+    });
+
+    connect(m_launchEngine, &LaunchEngine::logOutput, this, [this](const QString &line) {
+        m_logArea->append(line);
+    });
+
+    m_launchEngine->launch(m_versionDetails, "testMinecraft", username, offlineUuid(username), "0", gameDir);
 }
 
 void MainWindow::onManifestFetched(QList<VersionInfo> versions)
@@ -117,6 +146,7 @@ void MainWindow::populateVersionList(){
 
 
 void MainWindow::onVersionJsonParsed(VersionDetails details){
+    m_versionDetails = details;
     m_logArea->append("> Downloading libraries...");
     m_downloadManager = new DownloadManager(this);
     m_javaManager = new JavaManager(cacheDir, this);

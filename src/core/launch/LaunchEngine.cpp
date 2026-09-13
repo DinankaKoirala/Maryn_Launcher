@@ -7,7 +7,7 @@ LaunchEngine::LaunchEngine(QObject *parent): QObject(parent){
 LaunchEngine::Platform LaunchEngine::currentPlatform(){
 #if defined(Q_OS_WIN)
     return Platform::Windows;
-#elif defined (Q_OS_MACOS)
+#elif defined(Q_OS_MACOS)
     return Platform::MacOS;
 #else
     return Platform::Linux;
@@ -16,61 +16,61 @@ LaunchEngine::Platform LaunchEngine::currentPlatform(){
 
 QString LaunchEngine::javaExecutableName()
 {
-    return (currentPlatform() ==Platform::Windows) ? QStringLiteral("java.exe") : QStringLiteral("java");
+    return (currentPlatform() == Platform::Windows) ? QStringLiteral("java.exe") : QStringLiteral("java");
 }
 
 QString LaunchEngine::classPathSeparator(){
-    return (currentPlatform()==Platform::Windows) ? QStringLiteral(";") : QStringLiteral(":");
+    return (currentPlatform() == Platform::Windows) ? QStringLiteral(";") : QStringLiteral(":");
 }
 
-QString LaunchEngine::buildClassPath(const QStringList &libraryPath , const QString &clientJarPath) const{
+QString LaunchEngine::javaExecutablePath(const QString &baseDir, const QString &runtimeName) const {
+#if defined(Q_OS_MACOS)
+    return QDir::cleanPath(baseDir + "/runtime/" + runtimeName + "/jre.bundle/Contents/Home/bin/java");
+#else
+    return QDir::cleanPath(baseDir + "/runtime/" + runtimeName + "/bin/" + javaExecutableName());
+#endif
+}
+
+QString LaunchEngine::buildClassPath(const QStringList &libraryPath, const QString &clientJarPath) const{
     QStringList allPaths = libraryPath;
     allPaths << clientJarPath;
-
     return allPaths.join(classPathSeparator());
 }
 
- QString LaunchEngine::resolvePlaceholders(const QString &args , const QMap<QString, QString> &vars) const{
+QString LaunchEngine::resolvePlaceholders(const QString &args, const QMap<QString, QString> &vars) const{
     QString result = args;
-    for (auto it = vars.constBegin() ; it != vars.constEnd() ;  ++it){
+    for (auto it = vars.constBegin(); it != vars.constEnd(); ++it){
         QString placeholder = QStringLiteral("${") + it.key() + QStringLiteral("}");
         result.replace(placeholder, it.value());
     }
-
     return result;
 }
 
-
-QStringList LaunchEngine::resolveArgumentList(const QStringList &args , const QMap<QString, QString> &vars) const{
+QStringList LaunchEngine::resolveArgumentList(const QStringList &args, const QMap<QString, QString> &vars) const{
     QStringList resolved;
-
     for (const QString &arg : args){
-        resolved<<resolvePlaceholders(arg,vars);
+        resolved << resolvePlaceholders(arg, vars);
     }
     return resolved;
 }
 
 QStringList LaunchEngine::platformExtraJvmFlags() const {
     QStringList extra;
-
-#if defined (Q_OS_MACOS)
+#if defined(Q_OS_MACOS)
     extra << QStringLiteral("-XstartOnFirstThread");
 #endif
     return extra;
 }
 
-
 void LaunchEngine::launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &baseDir){
 
-    QString javaPath = QDir::cleanPath(baseDir + "/runtime/" + details.javaRuntimeName + "/bin/" + javaExecutableName());
-    qDebug() << "[LaunchEngine] Java:"<<javaPath;
+    QString javaPath = javaExecutablePath(baseDir, details.javaRuntimeName);
+    qDebug() << "[LaunchEngine] Java:" << javaPath;
 
     QString clientJarPath = QDir::cleanPath(baseDir + "/instances/" + instanceName + "/client.jar");
+    QString classPath = buildClassPath(details.libraryPaths, clientJarPath);
 
-    QString classPath = buildClassPath(details.libraryPaths , clientJarPath);
-
-    QMap<QString , QString> vars;
-
+    QMap<QString, QString> vars;
     vars["auth_player_name"] = playerName;
     vars["auth_uuid"] = playerUUID;
     vars["auth_access_token"] = accessToken;
@@ -97,55 +97,27 @@ void LaunchEngine::launch(const VersionDetails &details, const QString &instance
 
     qDebug() << "[LaunchEngine] fullArgs:" << fullArgs;
 
-
-
-    //launch
-
     QProcess *process = new QProcess(this);
     process->setProcessChannelMode(QProcess::MergedChannels);
 
-    connect(process, &QProcess::readyReadStandardOutput, this , [this, process](){
-       emit logOutput(QString::fromUtf8(process->readAllStandardOutput()));
+    connect(process, &QProcess::readyReadStandardOutput, this, [this, process](){
+        emit logOutput(QString::fromUtf8(process->readAllStandardOutput()));
     });
 
     connect(process, &QProcess::finished, this, [this](int exitCode){
-            qDebug() << "[LaunchEngine] Game exited:" <<exitCode;
-            emit gameFinished(exitCode);
+        qDebug() << "[LaunchEngine] Game exited:" << exitCode;
+        emit gameFinished(exitCode);
     });
 
-    connect(process, &QProcess::errorOccurred, this, [this,process](QProcess::ProcessError){
-       emit launchError(process->errorString());
+    connect(process, &QProcess::errorOccurred, this, [this, process](QProcess::ProcessError){
+        emit launchError(process->errorString());
     });
 
-    process ->start(javaPath, fullArgs);
+    process->start(javaPath, fullArgs);
     if(!process->waitForStarted(5000)){
         emit launchError("Failed to start Java: " + process->errorString());
         return;
     }
 
     emit gameStarted();
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

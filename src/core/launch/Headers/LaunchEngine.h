@@ -10,7 +10,6 @@
 
 class VersionJsonParser;
 
-
 class LaunchEngine : public QObject{
     Q_OBJECT
 
@@ -29,8 +28,9 @@ private:
     static Platform currentPlatform();
     static QString javaExecutableName();
     static QString classPathSeparator();
-    QString buildClassPath(const QStringList &libraryPath , const QString &clientJarPath) const;
-    QString resolvePlaceholders(const QString &args , const QMap<QString, QString> &vars) const;
-    QStringList resolveArgumentList(const QStringList &args , const QMap<QString, QString> &vars) const;
+    QString javaExecutablePath(const QString &baseDir, const QString &runtimeName) const;
+    QString buildClassPath(const QStringList &libraryPath, const QString &clientJarPath) const;
+    QString resolvePlaceholders(const QString &args, const QMap<QString, QString> &vars) const;
+    QStringList resolveArgumentList(const QStringList &args, const QMap<QString, QString> &vars) const;
     QStringList platformExtraJvmFlags() const;
 };

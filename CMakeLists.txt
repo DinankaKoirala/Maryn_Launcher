@@ -40,7 +40,7 @@ set(UI_SOURCES
     src/ui/MainWindow.cpp
     src/ui/MainWindow.h
     src/ui/MainWindow.ui
-    src/ui/InstanceWindow.cpp
+    src/ui/Instance.cpp
     src/ui/InstanceWindow.h
 )
 
@@ -60,7 +60,6 @@ target_include_directories(Maryn_Launcher PRIVATE
     src/core/download/Headers
     src/ui
     src/core/launch/Headers
-    src/core/instance/Headers
 )
 
 # ─── Link Libraries ───────────────────────────────────────────────────────────

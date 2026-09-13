@@ -76,9 +76,10 @@ if(APPLE)
     target_link_libraries(Maryn_Launcher PRIVATE
         "-framework Cocoa"
         "-framework IOKit"
+        "-framework OpenGL"
     )
     target_link_options(Maryn_Launcher PRIVATE
-        "-Wl,-weak_framework,AGL"
+        "-Wl,-undefined,dynamic_lookup"
     )
 endif()
 

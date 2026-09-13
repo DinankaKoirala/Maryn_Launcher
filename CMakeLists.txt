@@ -15,13 +15,11 @@ set(CORE_SOURCES
     # src/core/auth/OfflineAuthProvider.cpp
 
     # instance
-    # src/core/instance/Instance.cpp
     src/core/instance/InstanceManager.cpp
     src/core/instance/Headers/InstanceManager.h
 
     # download
     src/core/download/VersionManifest.cpp
-    src/core/download/Headers/VersionManifest.h
     src/core/download/Headers/VersionManifest.h
     src/core/download/Headers/VersionJsonParser.h
     src/core/download/Headers/VersionDetails.h
@@ -36,12 +34,6 @@ set(CORE_SOURCES
     # launch
     src/core/launch/LaunchEngine.cpp
     src/core/launch/Headers/LaunchEngine.h
-
-    # java
-    # src/core/java/JavaManager.cpp
-
-    # skin
-    # src/core/skin/LocalSkinProvider.cpp
 )
 
 set(UI_SOURCES
@@ -50,10 +42,6 @@ set(UI_SOURCES
     src/ui/MainWindow.ui
     src/ui/InstanceWindow.cpp
     src/ui/InstanceWindow.h
-    # src/ui/AccountPanel.cpp
-    # src/ui/AccountPanel.h
-    # src/ui/SettingsDialog.cpp
-    # src/ui/SettingsDialog.h
 )
 
 # ─── Executable ───────────────────────────────────────────────────────────────
@@ -84,6 +72,13 @@ target_link_libraries(Maryn_Launcher
         Qt6::Network
 )
 
+if(APPLE)
+    target_link_libraries(Maryn_Launcher PRIVATE
+        "-framework Cocoa"
+        "-framework IOKit"
+    )
+endif()
+
 # ─── Install ──────────────────────────────────────────────────────────────────
 
 install(TARGETS Maryn_Launcher
@@ -98,27 +93,3 @@ qt_generate_deploy_app_script(
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
 install(SCRIPT ${deploy_script})
-
-# ─── Windows Deploy ───────────────────────────────────────────────────────────
-if(WIN32)
-    add_custom_command(TARGET Maryn_Launcher POST_BUILD
-        COMMAND C:/Qt/6.11.1/mingw_64/bin/windeployqt.exe
-                --no-translations
-                --no-system-d3d-compiler
-                $<TARGET_FILE:Maryn_Launcher>
-        COMMENT "Running windeployqt..."
-    )
-elseif(APPLE)
-    find_program(MACDEPLOYQT_EXECUTABLE macdeployqt
-        HINTS "${Qt6_DIR}/../../../bin"
-    )
-    if(MACDEPLOYQT_EXECUTABLE)
-    add_custom_command(TARGET Maryn_Launcher POST_BUILD
-        COMMAND "${MACDEPLOYQT_EXECUTABLE}"
-                "$<TARGET_BUNDLE_DIR:Maryn_Launcher>"
-                -verbose=0
-        COMMAND codesign --force --deep --sign - "$<TARGET_BUNDLE_DIR:Maryn_Launcher>"
-        COMMENT "Running macdeployqt and re-signing..."
-    )
-    endif()
-endif()

@@ -97,10 +97,26 @@ jobs:
           version: '6.7.3'
           aqtversion: '==3.1.*'
 
+      - name: Stub missing AGL framework
+        run: |
+          FWDIR="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/AGL.framework"
+          if [ ! -d "$FWDIR" ]; then
+            sudo mkdir -p "$FWDIR"
+            echo "// stub" | sudo tee "$FWDIR/AGL.h" > /dev/null
+            echo '!<arch>' | sudo tee "$FWDIR/AGL" > /dev/null
+          fi
+          SDK=$(xcrun --show-sdk-path)
+          FWDIR2="$SDK/System/Library/Frameworks/AGL.framework"
+          if [ ! -d "$FWDIR2" ]; then
+            sudo mkdir -p "$FWDIR2/Headers"
+            echo "// stub" | sudo tee "$FWDIR2/Headers/agl.h" > /dev/null
+            echo '!<arch>' | sudo tee "$FWDIR2/AGL" > /dev/null
+          fi
+
       - name: Build
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DQT_FEATURE_opengles2=OFF -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
           cmake --build . -j4
 
       - name: Package DMG

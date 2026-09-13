@@ -17,8 +17,9 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.7.0'
+          version: '6.7.3'
           modules: 'qtnetwork'
+          aqtversion: '==3.1.*'
 
       - name: Install Linux dependencies
         run: |
@@ -39,13 +40,13 @@ jobs:
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           cp build/Maryn_Launcher AppDir/usr/bin/
           cat > AppDir/usr/share/applications/maryn-launcher.desktop << 'DESKTOP'
-          [Desktop Entry]
-          Name=Maryn Launcher
-          Exec=Maryn_Launcher
-          Icon=maryn-launcher
-          Type=Application
-          Categories=Game;
-          DESKTOP
+[Desktop Entry]
+Name=Maryn Launcher
+Exec=Maryn_Launcher
+Icon=maryn-launcher
+Type=Application
+Categories=Game;
+DESKTOP
           touch AppDir/usr/share/icons/hicolor/256x256/apps/maryn-launcher.png
           QMAKE=$(which qmake6 || which qmake)
           QMAKE=$QMAKE ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage
@@ -64,10 +65,11 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.7.0'
+          version: '6.7.3'
           arch: 'win64_mingw'
           modules: 'qtnetwork'
           tools: 'tools_mingw90'
+          aqtversion: '==3.1.*'
 
       - name: Build
         shell: cmd
@@ -101,8 +103,9 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.7.0'
+          version: '6.7.3'
           modules: 'qtnetwork'
+          aqtversion: '==3.1.*'
 
       - name: Build
         run: |

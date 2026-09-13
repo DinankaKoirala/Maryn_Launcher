@@ -77,6 +77,9 @@ if(APPLE)
         "-framework Cocoa"
         "-framework IOKit"
     )
+    target_link_options(Maryn_Launcher PRIVATE
+        "-Wl,-weak_framework,AGL"
+    )
 endif()
 
 # ─── Install ──────────────────────────────────────────────────────────────────

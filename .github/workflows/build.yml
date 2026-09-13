@@ -39,14 +39,7 @@ jobs:
           chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           cp build/Maryn_Launcher AppDir/usr/bin/
-          cat > AppDir/usr/share/applications/maryn-launcher.desktop << 'DESKTOP'
-[Desktop Entry]
-Name=Maryn Launcher
-Exec=Maryn_Launcher
-Icon=maryn-launcher
-Type=Application
-Categories=Game;
-DESKTOP
+          printf '[Desktop Entry]\nName=Maryn Launcher\nExec=Maryn_Launcher\nIcon=maryn-launcher\nType=Application\nCategories=Game;\n' > AppDir/usr/share/applications/maryn-launcher.desktop
           touch AppDir/usr/share/icons/hicolor/256x256/apps/maryn-launcher.png
           QMAKE=$(which qmake6 || which qmake)
           QMAKE=$QMAKE ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage

@@ -40,7 +40,7 @@ set(UI_SOURCES
     src/ui/MainWindow.cpp
     src/ui/MainWindow.h
     src/ui/MainWindow.ui
-    src/ui/Instance.cpp
+    src/ui/InstanceWindow.cpp
     src/ui/InstanceWindow.h
 )
 

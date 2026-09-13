@@ -1,0 +1,123 @@
+name: Build Maryn Launcher
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.0'
+          modules: 'qtnetwork'
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev libfuse2 patchelf
+
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . -j4
+
+      - name: Package AppImage
+        run: |
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+          mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
+          cp build/Maryn_Launcher AppDir/usr/bin/
+          cat > AppDir/usr/share/applications/maryn-launcher.desktop << 'DESKTOP'
+          [Desktop Entry]
+          Name=Maryn Launcher
+          Exec=Maryn_Launcher
+          Icon=maryn-launcher
+          Type=Application
+          Categories=Game;
+          DESKTOP
+          touch AppDir/usr/share/icons/hicolor/256x256/apps/maryn-launcher.png
+          QMAKE=$(which qmake6 || which qmake)
+          QMAKE=$QMAKE ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: Maryn-Launcher-Linux
+          path: Maryn_Launcher-*.AppImage
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.0'
+          arch: 'win64_mingw'
+          modules: 'qtnetwork'
+          tools: 'tools_mingw90'
+
+      - name: Build
+        shell: cmd
+        run: |
+          mkdir build && cd build
+          cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+          cmake --build . -j4
+
+      - name: Package
+        shell: cmd
+        run: |
+          mkdir release
+          copy build\Maryn_Launcher.exe release\
+          windeployqt --no-translations --no-system-d3d-compiler release\Maryn_Launcher.exe
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path release\* -DestinationPath Maryn-Launcher-Windows.zip
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Maryn-Launcher-Windows
+          path: Maryn-Launcher-Windows.zip
+
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.0'
+          modules: 'qtnetwork'
+
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . -j4
+
+      - name: Package DMG
+        run: |
+          cd build
+          macdeployqt Maryn_Launcher.app -dmg
+          mv Maryn_Launcher.dmg ../Maryn-Launcher-Mac.dmg
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Maryn-Launcher-Mac
+          path: Maryn-Launcher-Mac.dmg

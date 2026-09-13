@@ -113,15 +113,18 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
           cmake --build . -j4
 
-      - name: Sign app
+      - name: Sign and strip quarantine
         run: |
+          xattr -rd com.apple.quarantine build/Maryn_Launcher.app || true
           codesign --force --deep --sign - build/Maryn_Launcher.app
 
       - name: Package DMG
         run: |
           cd build
-          macdeployqt Maryn_Launcher.app -dmg
-          mv Maryn_Launcher.dmg ../Maryn-Launcher-Mac.dmg
+          macdeployqt Maryn_Launcher.app
+          xattr -rd com.apple.quarantine Maryn_Launcher.app || true
+          codesign --force --deep --sign - Maryn_Launcher.app
+          hdiutil create -volname "Maryn Launcher" -srcfolder Maryn_Launcher.app -ov -format UDZO ../Maryn-Launcher-Mac.dmg
 
       - name: Upload
         uses: actions/upload-artifact@v4

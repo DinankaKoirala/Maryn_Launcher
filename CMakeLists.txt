@@ -16,7 +16,8 @@ set(CORE_SOURCES
 
     # instance
     # src/core/instance/Instance.cpp
-    # src/core/instance/InstanceManager.cpp
+    src/core/instance/InstanceManager.cpp
+    src/core/instance/Headers/InstanceManager.h
 
     # download
     src/core/download/VersionManifest.cpp
@@ -47,8 +48,8 @@ set(UI_SOURCES
     src/ui/MainWindow.cpp
     src/ui/MainWindow.h
     src/ui/MainWindow.ui
-    # src/ui/InstanceGrid.cpp
-    # src/ui/InstanceGrid.h
+    src/ui/InstanceWindow.cpp
+    src/ui/InstanceWindow.h
     # src/ui/AccountPanel.cpp
     # src/ui/AccountPanel.h
     # src/ui/SettingsDialog.cpp
@@ -71,6 +72,7 @@ target_include_directories(Maryn_Launcher PRIVATE
     src/core/download/Headers
     src/ui
     src/core/launch/Headers
+    src/core/instance/Headers
 )
 
 # ─── Link Libraries ───────────────────────────────────────────────────────────

@@ -50,11 +50,16 @@ void AssetManager::download(const QString &assetIndexUrl, const QString &assetIn
     });
 }
 
-void AssetManager::downloadFile(const QString &url,const QString &savepath){
+void AssetManager::downloadFile(const QString &url, const QString &savepath) {
+    if (QFile::exists(savepath)) {
+        checkIfDone();
+        return;
+    }
+
     QNetworkReply *reply = m_manager->get(QNetworkRequest(QUrl(url)));
-    connect(reply, &QNetworkReply::finished, this, [this,reply,savepath](){
+    connect(reply, &QNetworkReply::finished, this, [this, reply, savepath]() {
         reply->deleteLater();
-        if(reply->error() != QNetworkReply::NoError) {
+        if (reply->error() != QNetworkReply::NoError) {
             emit errorOccurred(reply->errorString());
             return;
         }

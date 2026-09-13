@@ -1,11 +1,10 @@
 #include <QApplication>
-#include "MainWindow.h"
-#include "src/ui/MainWindow.h"
+#include "src/ui/InstanceWindow.h"
 
 int main(int argc, char *argv[]){
     QApplication app(argc, argv);
 
-    MainWindow window;
+    InstanceWindow window;
     window.show();
 
     app.setStyleSheet(R"(

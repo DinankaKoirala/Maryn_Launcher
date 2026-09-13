@@ -83,6 +83,9 @@ void LaunchEngine::launch(const VersionDetails &details, const QString &instance
     vars["classpath"] = classPath;
     vars["launcher_name"] = "MarynLauncher";
     vars["launcher_version"] = "0.1.0";
+    vars["natives_directory"] = QDir::toNativeSeparators(baseDir + "/instances/" + instanceName + "/natives");
+
+    QDir().mkpath(baseDir + "/instances/" + instanceName + "/natives");
 
     QStringList jvmArgs = resolveArgumentList(details.jvmArgs, vars);
     jvmArgs << platformExtraJvmFlags();

@@ -100,7 +100,7 @@ jobs:
       - name: Build
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DQT_FEATURE_opengles2=OFF -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
           cmake --build . -j4
 
       - name: Package DMG

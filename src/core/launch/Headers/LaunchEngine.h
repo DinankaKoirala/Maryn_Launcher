@@ -5,6 +5,10 @@
 #include <QMap>
 #include <QDir>
 #include <QProcess>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include "VersionDetails.h"
 #include <QStandardPaths>
 
@@ -33,4 +37,5 @@ private:
     QString resolvePlaceholders(const QString &args, const QMap<QString, QString> &vars) const;
     QStringList resolveArgumentList(const QStringList &args, const QMap<QString, QString> &vars) const;
     QStringList platformExtraJvmFlags() const;
+    bool loadLoaderProfile(const QString &instanceDir, const QString &baseDir, QString &mainClassOut, QStringList &extraLibsOut) const;
 };

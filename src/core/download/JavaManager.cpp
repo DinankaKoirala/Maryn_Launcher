@@ -25,6 +25,17 @@ QString JavaManager::platformKey()
 
 void JavaManager::download(const QString &runtimeName)
 {
+    QString runtimeDir = m_cacheDir + "/runtime/" + runtimeName;
+    #if defined(Q_OS_WIN)
+        QString javaBin = runtimeDir + "/bin/javaw.exe";
+    #else
+        QString javaBin = runtimeDir + "/bin/java";
+    #endif
+    if (QFile::exists(javaBin)) {
+        emit finished();
+        return;
+    }
+
     const QString url = QStringLiteral(
         "https://launchermeta.mojang.com/v1/products/java-runtime/"
         "2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json"
@@ -43,7 +54,6 @@ void JavaManager::download(const QString &runtimeName)
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         QJsonObject root = doc.object();
 
-        // Pick our platform, then our runtime inside it
         QJsonArray runtimeArray = root[platformKey()]
         .toObject()[runtimeName]
         .toArray();
@@ -53,7 +63,6 @@ void JavaManager::download(const QString &runtimeName)
             return;
         }
 
-        // The manifest URL is inside the first entry
         QString manifestUrl = runtimeArray[0]
         .toObject()["manifest"]
         .toObject()["url"]
@@ -62,6 +71,7 @@ void JavaManager::download(const QString &runtimeName)
         fetchManifest(manifestUrl, runtimeName);
     });
 }
+
 void JavaManager::fetchManifest(const QString &manifestUrl, const QString &runtimeName)
 {
     QNetworkReply *reply = m_manager->get(QNetworkRequest(QUrl(manifestUrl)));
@@ -118,6 +128,11 @@ void JavaManager::fetchManifest(const QString &manifestUrl, const QString &runti
 
 void JavaManager::downloadFile(const QString &url, const QString &savePath, bool isExecutable)
 {
+    if (QFile::exists(savePath)) {
+        checkIfDone();
+        return;
+    }
+
     QNetworkReply *reply = m_manager->get(QNetworkRequest(QUrl(url)));
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, savePath, isExecutable]() {
@@ -159,5 +174,3 @@ void JavaManager::checkIfDone()
         emit finished();
     }
 }
-
-

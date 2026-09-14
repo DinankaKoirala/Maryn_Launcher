@@ -1,7 +1,7 @@
 #include "Headers/InstanceManager.h"
 
 
-void InstanceManager::createInstance(QString &instanceName , const QString &baseDir , const QString &instanceVersion){
+void InstanceManager::createInstance(QString &instanceName, const QString &baseDir, const QString &instanceVersion, const QString &loader, const QString &loaderVersion){
 
     QDir dir;
     dir.mkpath(baseDir + "/instances/" + instanceName + "/");
@@ -16,6 +16,8 @@ void InstanceManager::createInstance(QString &instanceName , const QString &base
         QJsonObject rootObject;
         rootObject["name"] = instanceName;
         rootObject["version"] = instanceVersion;
+        rootObject["loader"] = loader;
+        rootObject["loaderVersion"] = loaderVersion;
 
         QJsonDocument jsonDoc(rootObject);
 
@@ -66,6 +68,8 @@ QList<Instance> InstanceManager::fetchInstancesList(const QString &baseDir){
                     Instance tempInstance;
                     tempInstance.name = jsonObj["name"].toString();
                     tempInstance.version = jsonObj["version"].toString();
+                    tempInstance.loader = jsonObj["loader"].toString("vanilla");
+                    tempInstance.loaderVersion = jsonObj["loaderVersion"].toString("");
 
                     instances.append(tempInstance);;
                 }else {
@@ -102,6 +106,8 @@ Instance InstanceManager::getInstanceData(QString &instanceName , const QString 
                     QJsonObject jsonObj = jsonDoc.object();
                     tempInstance.name = jsonObj["name"].toString();
                     tempInstance.version = jsonObj["version"].toString();
+                    tempInstance.loader = jsonObj["loader"].toString("vanilla");
+                    tempInstance.loaderVersion = jsonObj["loaderVersion"].toString("");
                 }else {
                     qWarning() << "JSON parse error in" << jsonFilePath << ":";
                 }
@@ -114,16 +120,17 @@ Instance InstanceManager::getInstanceData(QString &instanceName , const QString 
 void InstanceManager::updateInstance(const QString &instanceName, const QString &baseDir, const QString &newVersion) {
     QString jsonPath = baseDir + "/instances/" + instanceName + "/instance.json";
 
-    QJsonObject rootObject;
-    rootObject["name"] = instanceName;
+    QFile file(jsonPath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+    QJsonObject rootObject = QJsonDocument::fromJson(file.readAll()).object();
+    file.close();
+
     rootObject["version"] = newVersion;
 
-    QJsonDocument jsonDoc(rootObject);
-    QFile file(jsonPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Failed to open instance.json for writing:" << file.errorString();
-        return;
-    }
-    file.write(jsonDoc.toJson(QJsonDocument::Indented));
+    qDebug() << "Failed to open instance.json for writing:" << file.errorString();
+    return;
+}
+    file.write(QJsonDocument(rootObject).toJson(QJsonDocument::Indented));
     file.close();
 }

@@ -13,6 +13,7 @@
 #include "../core/download/Headers/AssetManager.h"
 #include "../core/download/Headers/JavaManager.h"
 #include "../core/download/Headers/VersionDetails.h"
+#include "../core/loader/Headers/LoaderManager.h"
 
 class DownloadManager;
 class LaunchEngine;
@@ -41,6 +42,7 @@ private:
     VersionJsonParser *m_versionJsonParser = nullptr;
     AssetManager *m_assetManager = nullptr;
     JavaManager *m_javaManager = nullptr;
+    LoaderManager *m_loaderManager = nullptr;
     QList<VersionInfo> m_versions;
     QTextEdit *m_logArea;
     QLineEdit *m_nameInput;

@@ -23,19 +23,28 @@ void DownloadManager::download(const VersionDetails &details, const QString &ins
     QDir dir;
     dir.mkpath(instanceDir);
 
+    // skip client.jar if already downloaded
     QString clientPath = instanceDir + "/client.jar";
-    downloadFile(details.clientUrl, clientPath);
+    qDebug() << "[DownloadManager] client path:" << clientPath;
+    if (QFile::exists(clientPath)) {
+        qDebug() << "[DownloadManager] client exists:" << QFile::exists(clientPath);
+        m_completedCount++;
+        emit progress(m_completedCount, m_totalCount);
+    } else {
+        downloadFile(details.clientUrl, clientPath);
+    }
+
     for(const LibraryInfo &lib : details.libraries){
         QString libPath = m_baseDir + "/libraries/" + lib.path;
         QFileInfo fileInfo(libPath);
         dir.mkpath(fileInfo.absolutePath());
 
-    if(QFile::exists(libPath)){
-        m_completedCount++;
-        emit progress(m_completedCount,m_totalCount);
-        continue;
-    }
-    downloadFile(lib.url, libPath);
+        if(QFile::exists(libPath)){
+            m_completedCount++;
+            emit progress(m_completedCount, m_totalCount);
+            continue;
+        }
+        downloadFile(lib.url, libPath);
     }
     checkIfDone();
 }

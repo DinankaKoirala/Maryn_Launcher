@@ -18,6 +18,10 @@ set(CORE_SOURCES
     src/core/instance/InstanceManager.cpp
     src/core/instance/Headers/InstanceManager.h
 
+    # loader
+    src/core/loader/LoaderManager.cpp
+    src/core/loader/Headers/LoaderManager.h
+
     # download
     src/core/download/VersionManifest.cpp
     src/core/download/Headers/VersionManifest.h
@@ -58,8 +62,10 @@ qt_add_executable(Maryn_Launcher
 target_include_directories(Maryn_Launcher PRIVATE
     src/core
     src/core/download/Headers
-    src/ui
+    src/core/instance/Headers
+    src/core/loader/Headers
     src/core/launch/Headers
+    src/ui
 )
 
 # ─── Link Libraries ───────────────────────────────────────────────────────────

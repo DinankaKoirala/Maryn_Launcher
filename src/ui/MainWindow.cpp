@@ -2,6 +2,7 @@
 #include "../core/download/Headers/DownloadManager.h"
 #include "../core/launch/Headers/LaunchEngine.h"
 #include "../core/instance/Headers/InstanceManager.h"
+#include "../core/loader/Headers/LoaderManager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
@@ -9,6 +10,7 @@ MainWindow::MainWindow(const QString &instanceName, const QString &version, cons
     : QWidget(parent), m_instanceName(instanceName), m_instanceVersion(version), m_versions(versions)
 {
     cacheDir = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first();
+    m_loaderManager = new LoaderManager(this);
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
@@ -122,8 +124,33 @@ void MainWindow::onVersionJsonParsed(VersionDetails details) {
         m_logArea->append("> Libraries done. Downloading assets...");
         connect(m_assetManager, &AssetManager::finished, this, [this, details]() {
             m_logArea->append("> Assets done. Downloading Java...");
-            connect(m_javaManager, &JavaManager::finished, this, [this]() {
+            connect(m_javaManager, &JavaManager::finished, this, [this, details]() {
                 m_logArea->append("> All downloads complete.");
+
+                // Install loader if needed
+                InstanceManager mgr;
+                QString baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+                Instance inst = mgr.getInstanceData(const_cast<QString&>(m_instanceName), baseDir);
+
+                if (inst.loader == "fabric" || inst.loader == "quilt") {
+                    m_logArea->append("> Installing " + inst.loader + "...");
+                    LoaderType lt = (inst.loader == "fabric") ? LoaderType::Fabric : LoaderType::Quilt;
+
+                    connect(m_loaderManager, &LoaderManager::installerFinished, this, [this]() {
+                        m_logArea->append("> Loader installed.");
+                    });
+                    connect(m_loaderManager, &LoaderManager::errorOccurred, this, [this](QString msg) {
+                        m_logArea->append("> Loader error: " + msg);
+                    });
+
+                    m_loaderManager->installLoader(
+                        inst.version,
+                        inst.loaderVersion,
+                        lt,
+                        baseDir + "/instances/" + m_instanceName,
+                        baseDir
+                    );
+                }
             });
             m_javaManager->download(details.javaRuntimeName);
         });

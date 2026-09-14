@@ -62,30 +62,87 @@ QStringList LaunchEngine::platformExtraJvmFlags() const {
     return extra;
 }
 
+bool LaunchEngine::loadLoaderProfile(const QString &instanceDir, const QString &baseDir, QString &mainClassOut, QStringList &extraLibsOut) const {
+    // Check for fabric or quilt profile
+    QString profilePath;
+    if (QFile::exists(instanceDir + "/fabric-profile.json"))
+        profilePath = instanceDir + "/fabric-profile.json";
+    else if (QFile::exists(instanceDir + "/quilt-profile.json"))
+        profilePath = instanceDir + "/quilt-profile.json";
+    else
+        return false;
+
+    QFile file(profilePath);
+    if (!file.open(QIODevice::ReadOnly))
+        return false;
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+
+    if (!doc.isObject())
+        return false;
+
+    QJsonObject root = doc.object();
+    mainClassOut = root["mainClass"].toString();
+
+    // Parse loader libraries and convert to paths
+    QJsonArray libraries = root["libraries"].toArray();
+    for (const QJsonValue &val : libraries) {
+        QJsonObject lib = val.toObject();
+        QString name = lib["name"].toString();
+
+        QStringList parts = name.split(':');
+        if (parts.size() < 3) continue;
+
+        QString group    = parts[0].replace('.', '/');
+        QString artifact = parts[1];
+        QString version  = parts[2];
+        QString path     = QString("%1/%2/%3/%2-%3.jar").arg(group, artifact, version);
+        QString fullPath = QDir::cleanPath(baseDir + "/libraries/" + path);
+
+        if (QFile::exists(fullPath))
+            extraLibsOut << fullPath;
+    }
+
+    return true;
+}
+
 void LaunchEngine::launch(const VersionDetails &details, const QString &instanceName, const QString &playerName, const QString &playerUUID, const QString &accessToken, const QString &baseDir){
 
     QString javaPath = javaExecutablePath(baseDir, details.javaRuntimeName);
     qDebug() << "[LaunchEngine] Java:" << javaPath;
 
-    QString clientJarPath = QDir::cleanPath(baseDir + "/instances/" + instanceName + "/client.jar");
-    QString classPath = buildClassPath(details.libraryPaths, clientJarPath);
+    QString instanceDir = QDir::cleanPath(baseDir + "/instances/" + instanceName);
+    QString clientJarPath = instanceDir + "/client.jar";
+
+    // Check for loader profile and override mainClass + prepend loader libs
+    QString mainClass = details.mainClass;
+    QStringList loaderLibs;
+    bool hasLoader = loadLoaderProfile(instanceDir, baseDir, mainClass, loaderLibs);
+
+    if (hasLoader)
+        qDebug() << "[LaunchEngine] Loader profile found, mainClass:" << mainClass;
+
+    // Loader libs go first in classpath so they take priority
+    QStringList allLibPaths = loaderLibs + details.libraryPaths;
+    QString classPath = buildClassPath(allLibPaths, clientJarPath);
 
     QMap<QString, QString> vars;
-    vars["auth_player_name"] = playerName;
-    vars["auth_uuid"] = playerUUID;
+    vars["auth_player_name"]  = playerName;
+    vars["auth_uuid"]         = playerUUID;
     vars["auth_access_token"] = accessToken;
-    vars["user_type"] = "mojang";
-    vars["version_name"] = details.versionId;
-    vars["version_type"] = "release";
-    vars["game_directory"]    = QDir::toNativeSeparators(baseDir + "/instances/" + instanceName);
+    vars["user_type"]         = "mojang";
+    vars["version_name"]      = details.versionId;
+    vars["version_type"]      = "release";
+    vars["game_directory"]    = QDir::toNativeSeparators(instanceDir);
     vars["assets_root"]       = QDir::toNativeSeparators(baseDir + "/assets");
     vars["assets_index_name"] = details.assetIndexId;
-    vars["classpath"] = classPath;
-    vars["launcher_name"] = "MarynLauncher";
-    vars["launcher_version"] = "0.1.0";
-    vars["natives_directory"] = QDir::toNativeSeparators(baseDir + "/instances/" + instanceName + "/natives");
+    vars["classpath"]         = classPath;
+    vars["launcher_name"]     = "MarynLauncher";
+    vars["launcher_version"]  = "0.1.0";
+    vars["natives_directory"] = QDir::toNativeSeparators(instanceDir + "/natives");
 
-    QDir().mkpath(baseDir + "/instances/" + instanceName + "/natives");
+    QDir().mkpath(instanceDir + "/natives");
 
     QStringList jvmArgs = resolveArgumentList(details.jvmArgs, vars);
     jvmArgs << platformExtraJvmFlags();
@@ -95,7 +152,7 @@ void LaunchEngine::launch(const VersionDetails &details, const QString &instance
     QStringList fullArgs;
     fullArgs << jvmArgs;
     fullArgs << "-cp" << classPath;
-    fullArgs << details.mainClass;
+    fullArgs << mainClass;
     fullArgs << gameArgs;
 
     qDebug() << "[LaunchEngine] fullArgs:" << fullArgs;

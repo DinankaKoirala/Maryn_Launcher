@@ -7,7 +7,7 @@ import Donate from './pages/Donate'
 
 export default function App() {
   return (
-    <BrowserRouter basename="/Maryn_Launcher">
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />

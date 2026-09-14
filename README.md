@@ -1,4 +1,5 @@
 # Maryn Launcher
+[Official Maryn Launcher website](https://dinankakoirala.github.io/Maryn_Launcher/)
 
 A lightweight, cross-platform Minecraft Java Edition launcher built with C++ and Qt 6 Widgets. Supports both offline (cracked) and Microsoft-authenticated players, instance-based profile management, Modrinth mod integration, and automatic Java management.
 
